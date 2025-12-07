@@ -1,11 +1,742 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <title>SM Transportes – Plataforma Logística</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SM Transportes – Plataforma Logística</title>
+
+    <!-- Estilos principais -->
+    <style>
+        :root {
+            --primary-dark: #1F2A33;
+            --primary-light: #f4f5f7;
+            --accent: #d9933d;
+            --text-dark: #2b2b2b;
+            --menu-width: 240px;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: var(--primary-light);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Header superior */
+        header {
+            background: var(--primary-dark);
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: fixed;
+            top: 0;
+            left: var(--menu-width);
+            right: 0;
+            height: 60px;
+            z-index: 10;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 400;
+        }
+
+        /* Menu lateral fixo */
+        #menu {
+            width: var(--menu-width);
+            background: var(--primary-dark);
+            color: white;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            padding-top: 80px;
+            overflow-y: auto;
+        }
+
+        #menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        #menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+        }
+
+        /* Área principal */
+        #content {
+            margin-left: var(--menu-width);
+            padding: 80px 25px 25px 25px;
+        }
+
+        /* Seções da SPA */
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Logomarca no header */
+        .logo-header {
+            height: 45px;
+        }
+
+        /* Cards do dashboard */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .card {
+            background: white;
+            padding: 18px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+            font-size: 14px;
+        }
+        /* Títulos das seções */
+        h2.section-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        /* Tabelas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        th {
+            background: #ececec;
+            text-align: left;
+        }
+
+        /* Formulários */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            background: #fff;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Ícones SVG embutidos */
+        .icon {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        /* Mobile-first */
+        @media (max-width: 900px) {
+            #menu {
+                position: fixed;
+                left: -240px;
+                transition: left 0.3s ease;
+            }
+            #menu.open {
+                left: 0;
+            }
+            header {
+                left: 0 !important;
+            }
+            #content {
+                margin-left: 0;
+                padding-top: 80px;
+            }
+            .menu-toggle {
+                display: block;
+                margin-right: auto;
+                cursor: pointer;
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <h1>SM Transportes – Plataforma Logística</h1>
-  <p>Inicializando sistema...</p>
+
+    <!-- MENU LATERAL -->
+    <nav id="menu">
+
+        <a onclick="show('dashboard')">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M3 13h8V3H3v10zm10 8h8V3h-8v18zm-10 0h8v-6H3v6z"/>
+            </svg>
+            Dashboard
+        </a>
+
+        <a onclick="show('ot-lista')">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M3 3v18h18V3H3zm4 14H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V7h2v2zm12 8H9v-2h10v2zm0-4H9v-2h10v2zm0-4H9V7h10v2z"/>
+            </svg>
+            Ordens de Transporte
+        </a>
+
+        <a onclick="show('motoristas')">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+            </svg>
+            Motoristas
+        </a>
+
+        <a onclick="show('frota')">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M20 8h-3V4H7v4H4l-2 6v2h2v2h2v-2h12v2h2v-2h2v-2l-2-6zm-11 0V6h6v2H9z"/>
+            </svg>
+            Frota
+        </a>
+
+        <a onclick="show('config')">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .11-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.025 7.025 0 0 0-1.63-.94l-.36-2.54A.488.488 0 0 0 14.29 2h-4.58c-.24 0-.44.17-.48.4l-.36 2.54c-.59.24-1.13.55-1.63.94l-2.39-.96a.5.5 0 0 0-.61.22L2.32 8.48c-.14.24-.08.55.11.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.43 14.68a.5.5 0 0 0-.11.64l1.92 3.32c.14.24.44.34.7.22l2.39-.96c.5.39 1.04.7 1.63.94l.36 2.54c.04.23.24.4.48.4h4.58c.24 0 .44-.17.48-.40l.36-2.54c.59-.24 1.13-.55 1.63-.94l2.39.96c.26.11.56.02.7-.22l1.92-3.32a.5.5 0 0 0-.11-.64l-2.03-1.58zM12 15.5c-1.88 0-3.5-1.62-3.5-3.5S10.12 8.5 12 8.5s3.5 1.62 3.5 3.5-1.62 3.5-3.5 3.5z"/>
+            </svg>
+            Configurações
+        </a>
+    </nav>
+    <!-- HEADER SUPERIOR -->
+    <header>
+        <img class="logo-header" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...TRUNCATED_FOR_BREVITY..." />
+        <h1>SM Transportes – Plataforma Logística</h1>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div id="content">
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="section active">
+            <h2 class="section-title">Dashboard</h2>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Total de Pedidos</h3>
+                    <p id="dash-total-pedidos">0</p>
+                </div>
+
+                <div class="card">
+                    <h3>Em Rota</h3>
+                    <p id="dash-em-rota">0</p>
+                </div>
+
+                <div class="card">
+                    <h3>Entregues</h3>
+                    <p id="dash-entregues">0</p>
+                </div>
+
+                <div class="card">
+                    <h3>Motoristas Ativos</h3>
+                    <p id="dash-motoristas-ativos">0</p>
+                </div>
+
+                <div class="card">
+                    <h3>Caminhões Disponíveis</h3>
+                    <p id="dash-frota-disponivel">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- LISTAGEM OTs -->
+        <section id="ot-lista" class="section">
+            <h2 class="section-title">Ordens de Transporte</h2>
+
+            <button class="btn" onclick="show('ot-nova')">+ Nova OT</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Origem</th>
+                        <th>Destino</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="ot-tabela-body">
+                    <!-- AQUI ENTRAM AS LINHAS VIA JS -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- FORMULÁRIO: NOVA OT -->
+        <section id="ot-nova" class="section">
+            <h2 class="section-title">Nova Ordem de Transporte</h2>
+            
+            <form id="form-ot">
+
+                <div class="form-group">
+                    <label>Data da Adjudicação:</label>
+                    <input type="date" id="ot-data-adjudicacao" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Data Pretendida da Carga:</label>
+                    <input type="date" id="ot-data-carga" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Cliente:</label>
+                    <input type="text" id="ot-cliente" placeholder="Nome do Cliente" required>
+                </div>
+
+                <h3>Dados da Viatura</h3>
+
+                <div class="form-group">
+                    <label>Marca:</label>
+                    <input type="text" id="ot-marca" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Modelo:</label>
+                    <input type="text" id="ot-modelo" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Chassi / Matrícula:</label>
+                    <input type="text" id="ot-chassi" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Valor (€):</label>
+                    <input type="number" id="ot-valor" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Danos Visíveis:</label>
+                    <select id="ot-danos">
+                        <option value="Nenhum">Nenhum</option>
+                        <option value="Riscos">Riscos</option>
+                        <option value="Amolgadelas">Amolgadelas</option>
+                        <option value="Vidro rachado">Vidro rachado</option>
+                    </select>
+                </div>
+
+                <h3>Coleta (Remetente)</h3>
+
+                <div class="form-group">
+                    <label>Nome do Remetente:</label>
+                    <input type="text" id="ot-remetente" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Morada Completa:</label>
+                    <textarea id="ot-remetente-morada" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Telefone:</label>
+                    <input type="text" id="ot-remetente-fone" required>
+                </div>
+
+                <h3>Entrega (Destinatário)</h3>
+
+                <div class="form-group">
+                    <label>Nome do Destinatário:</label>
+                    <input type="text" id="ot-destinatario" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Morada Completa:</label>
+                    <textarea id="ot-destinatario-morada" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Telefone:</label>
+                    <input type="text" id="ot-destinatario-fone" required>
+                </div>
+
+                <button class="btn" type="submit">Salvar OT</button>
+            </form>
+        </section>
+        <!-- MOTORISTAS -->
+        <section id="motoristas" class="section">
+            <h2 class="section-title">Motoristas</h2>
+
+            <button class="btn" onclick="show('motorista-novo')">+ Novo Motorista</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>País Base</th>
+                        <th>Status</th>
+                        <th>Horas Trabalhadas</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="motoristas-tabela-body">
+                    <!-- Preenchido via JS -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- FORMULÁRIO: NOVO MOTORISTA -->
+        <section id="motorista-novo" class="section">
+            <h2 class="section-title">Novo Motorista</h2>
+
+            <div class="form-group">
+                <label>Nome do Motorista:</label>
+                <input type="text" id="moto-nome" required>
+            </div>
+
+            <div class="form-group">
+                <label>País Base:</label>
+                <input type="text" id="moto-pais" required>
+            </div>
+
+            <div class="form-group">
+                <label>Status:</label>
+                <select id="moto-status">
+                    <option value="Disponível">Disponível</option>
+                    <option value="Em rota">Em rota</option>
+                    <option value="Pausa">Pausa</option>
+                </select>
+            </div>
+
+            <button class="btn" onclick="salvarMotorista()">Salvar Motorista</button>
+        </section>
+
+        <!-- FROTA -->
+        <section id="frota" class="section">
+            <h2 class="section-title">Frota</h2>
+
+            <button class="btn" onclick="show('frota-novo')">+ Novo Caminhão</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Placa</th>
+                        <th>País</th>
+                        <th>Status</th>
+                        <th>KM Atual</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="frota-tabela-body">
+                    <!-- Preenchido via JS -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- FORMULÁRIO: NOVO CAMINHÃO -->
+        <section id="frota-novo" class="section">
+            <h2 class="section-title">Novo Caminhão</h2>
+
+            <div class="form-group">
+                <label>Código:</label>
+                <input type="text" id="frota-codigo" required>
+            </div>
+
+            <div class="form-group">
+                <label>Placa:</label>
+                <input type="text" id="frota-placa" required>
+            </div>
+
+            <div class="form-group">
+                <label>País:</label>
+                <input type="text" id="frota-pais" required>
+            </div>
+
+            <div class="form-group">
+                <label>Status:</label>
+                <select id="frota-status">
+                    <option value="Disponível">Disponível</option>
+                    <option value="Manutenção">Manutenção</option>
+                    <option value="Em rota">Em rota</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>KM Atual:</label>
+                <input type="number" id="frota-km" required>
+            </div>
+
+            <button class="btn" onclick="salvarCaminhao()">Salvar Caminhão</button>
+        </section>
+
+        <!-- CONFIGURAÇÕES -->
+        <section id="config" class="section">
+            <h2 class="section-title">Configurações</h2>
+
+            <p>Aqui você poderá ajustar integrações, tokens, conexão com Google Sheets / Apps Script, etc.</p>
+
+            <div class="form-group">
+                <label>URL do Apps Script:</label>
+                <input type="text" id="config-script-url" placeholder="Cole aqui o link do Google Apps Script">
+            </div>
+
+            <button class="btn" onclick="salvarConfig()">Salvar Configuração</button>
+        </section>
+
+    </div> <!-- fim do content -->
+
+    <!-- SCRIPTS DO SISTEMA -->
+    <script>
+
+        let API_URL = "";
+
+        function salvarConfig() {
+            API_URL = document.getElementById("config-script-url").value;
+            alert("Configurações salvas!");
+        }
+
+        function show(id) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+        /* ================================
+               FUNÇÕES DO SISTEMA
+           ================================ */
+
+        // LISTAR ORDENS DE TRANSPORTE
+        async function carregarOTs() {
+            if (!API_URL) {
+                console.warn("API_URL não configurada.");
+                return;
+            }
+
+            try {
+                const resposta = await fetch(API_URL + "?action=listOT");
+                const dados = await resposta.json();
+                
+                const tbody = document.getElementById("ot-tabela-body");
+                tbody.innerHTML = "";
+
+                dados.forEach(ot => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${ot.id}</td>
+                        <td>${ot.cliente}</td>
+                        <td>${ot.origem}</td>
+                        <td>${ot.destino}</td>
+                        <td>${ot.status}</td>
+                        <td>
+                            <button class="btn" onclick="verOT(${ot.id})">Ver</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                atualizarDashboard(dados);
+
+            } catch (e) {
+                console.error("Erro ao carregar OTs:", e);
+            }
+        }
+
+        // SALVAR NOVA OT
+        async function salvarOT(e) {
+            e.preventDefault();
+
+            if (!API_URL) {
+                alert("Configure a URL do Apps Script primeiro!");
+                return;
+            }
+
+            const dados = {
+                action: "addOT",
+                adjudicacao: document.getElementById("ot-data-adjudicacao").value,
+                carga: document.getElementById("ot-data-carga").value,
+                cliente: document.getElementById("ot-cliente").value,
+                marca: document.getElementById("ot-marca").value,
+                modelo: document.getElementById("ot-modelo").value,
+                chassi: document.getElementById("ot-chassi").value,
+                valor: document.getElementById("ot-valor").value,
+                danos: document.getElementById("ot-danos").value,
+                remetente: document.getElementById("ot-remetente").value,
+                remetente_morada: document.getElementById("ot-remetente-morada").value,
+                remetente_fone: document.getElementById("ot-remetente-fone").value,
+                destinatario: document.getElementById("ot-destinatario").value,
+                destinatario_morada: document.getElementById("ot-destinatario-morada").value,
+                destinatario_fone: document.getElementById("ot-destinatario-fone").value,
+            };
+
+            try {
+                const resposta = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify(dados)
+                });
+
+                const resultado = await resposta.text();
+                alert("OT salva com sucesso!");
+
+                show('ot-lista');
+                carregarOTs();
+
+            } catch (e) {
+                alert("Erro ao salvar OT!");
+                console.error(e);
+            }
+        }
+
+        document.getElementById("form-ot").addEventListener("submit", salvarOT);
+
+
+        /* ================================
+                 MOTORISTAS
+           ================================ */
+
+        async function salvarMotorista() {
+            if (!API_URL) return alert("Configure a URL do Apps Script!");
+
+            const dados = {
+                action: "addMotorista",
+                nome: document.getElementById("moto-nome").value,
+                pais: document.getElementById("moto-pais").value,
+                status: document.getElementById("moto-status").value
+            };
+
+            try {
+                await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify(dados)
+                });
+                alert("Motorista salvo com sucesso!");
+                show('motoristas');
+            } catch (e) {
+                console.error(e);
+                alert("Erro ao salvar motorista.");
+            }
+        }
+
+        /* ================================
+                     FROTA
+           ================================ */
+
+        async function salvarCaminhao() {
+            if (!API_URL) return alert("Configure a URL do Apps Script!");
+
+            const dados = {
+                action: "addCaminhao",
+                codigo: document.getElementById("frota-codigo").value,
+                placa: document.getElementById("frota-placa").value,
+                pais: document.getElementById("frota-pais").value,
+                status: document.getElementById("frota-status").value,
+                km: document.getElementById("frota-km").value
+            };
+
+            try {
+                await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify(dados)
+                });
+                alert("Caminhão salvo com sucesso!");
+                show('frota');
+            } catch (e) {
+                alert("Erro ao salvar caminhão.");
+                console.error(e);
+            }
+        }
+
+        /* ================================
+              DASHBOARD (SIMPLIFICADO)
+           ================================ */
+
+        function atualizarDashboard(lista) {
+            try {
+                document.getElementById("dash-total-pedidos").innerText = lista.length;
+                document.getElementById("dash-em-rota").innerText =
+                    lista.filter(x => x.status === "Em rota").length;
+                document.getElementById("dash-entregues").innerText =
+                    lista.filter(x => x.status === "Entregue").length;
+            } catch (e) {
+                console.error("Erro ao atualizar dashboard:", e);
+            }
+        }
+        /* ================================
+              VISUALIZAR UMA OT
+           ================================ */
+
+        async function verOT(id) {
+            if (!API_URL) return alert("Configure o Apps Script!");
+
+            try {
+                const resp = await fetch(API_URL + "?action=viewOT&id=" + id);
+                const dados = await resp.json();
+
+                let texto = `
+                    ID: ${dados.id}\n
+                    Cliente: ${dados.cliente}\n
+                    Origem: ${dados.origem}\n
+                    Destino: ${dados.destino}\n
+                    Status: ${dados.status}
+                `;
+
+                alert(texto);
+
+            } catch (e) {
+                alert("Erro ao visualizar OT");
+                console.error(e);
+            }
+        }
+
+        /* ================================
+               CARREGAR DADOS AO INICIAR
+           ================================ */
+
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Sistema iniciado.");
+            carregarOTs();
+        });
+
+    </script>
+
 </body>
 </html>
